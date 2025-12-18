@@ -1,0 +1,18 @@
+{
+  "name": "Python Codespace con Jupyter",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11",
+
+  "postCreateCommand": "pip install notebook jupyterlab ipykernel pandas numpy matplotlib seaborn scikit-learn plotly yellowbrick imbalanced-learn joblib",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-toolsai.jupyter",
+        "ms-python.python",
+        "ms-toolsai.jupyter-keymap",
+        "ms-toolsai.jupyter-renderers",
+        "ms-toolsai.vscode-jupyter-slideshow"
+      ]
+    }
+  }
+}
