@@ -1,6 +1,40 @@
-# macOS
+############################
+# Sistema operativo
+############################
 .DS_Store
+Thumbs.db
 
+kaggle/
+.DS_Store
+Thumbs.db
+
+############################
 # Datos
+############################
 kaggle/input/
 *.parquet
+
+############################
+# Python
+############################
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+.eggs/
+.env
+.venv/
+venv/
+ENV/
+
+############################
+# Jupyter / Notebooks
+############################
+.ipynb_checkpoints/
+*.nbconvert.ipynb
+
+############################
+# IDEs
+############################
+.vscode/
+.idea/
