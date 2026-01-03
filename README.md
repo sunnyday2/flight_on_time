@@ -69,9 +69,7 @@ Orientado a: Hackathon / Always Free / Entorno académico
 
 ```
 dataset_vuelos_clima_final.csv
-
 ```
-
 Variables utilizadas (nombres originales, sin modificaciones):
 
 marketing_airline_network
@@ -95,9 +93,6 @@ delayed = 0 → Vuelo puntual
 delayed = 1 → Vuelo retrasado
 
 El dataset combina información operacional de vuelos con condiciones climáticas, permitiendo capturar patrones relevantes de retraso.
-
-```
-
 Incluye **features meteorológicas** integradas desde una API externa de clima.
 
 ---
