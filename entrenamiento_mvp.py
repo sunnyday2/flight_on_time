@@ -28,12 +28,17 @@ from sklearn.metrics import classification_report, roc_auc_score
 import joblib
 #joblib permite guardar y cargar modelos entrenados .pkl
 
+# Cargamos el dataset final ya preparado
+# Contiene información del vuelo + clima + variable objetivo (delayed)
+
 df = pd.read_csv("dataset_vuelos_clima_final.csv")
+
+# Mostramos tamaño del dataset y primeras filas para inspección rápida
 
 print(df.shape)
 df.head()
 
-#columnas que queremos obligatorias`
+#columnas que queremos obligatorias o minimas
 
 required_cols = [
     "hour",
@@ -45,11 +50,11 @@ required_cols = [
     "delayed"
 ]
 
-#limpio nulos
+#limpio nulos en columnas clave
 
 df = df.dropna(subset=required_cols)
 
-#elimino horas y vuelos que no valen
+#elimino horas y vuelos que no valen. Fuera de rango de hora realista y distancias no válidas
 
 df = df[df["hour"].between(0, 23)]
 df = df[df["distance"] > 0]
@@ -72,7 +77,7 @@ TARGET = "delayed"
 X = df[FEATURES]
 y = df[TARGET]
 
-#lista columnas numericas, distinto a categorías
+#lista columnas numericas, distinto a categorías. Columnas van a ser números y columnas van a ser texto o categoría para ColumnTransformer (siguiente celda)
 
 numeric_features = [
     "hour",
@@ -86,16 +91,25 @@ categorical_features = [
     "marketing_airline_network"
 ]
 
+#Aquí es la "adaptación" a las normas JSON. El JSON se convierte en dataframe. El pipeline aplica esas transformaciones en entrenamiento.
+#Las variables numéricas no se escalan (se podría hacer). Las variables que son categorías se convierten con one hot.
+#handle_unknown="ignore" evita errores con aerolíneas nuevas
+
+
 #procesamos. pasamos numéricas como están y aplicamos One Hot Encoding para evitar leakage
 
-preprocessor = ColumnTransformer(
+preprocessor = ColumnTransformer(        #a las columnas las sometemos a transfomación: las numericas y las categóricas
     transformers=[
-        ("num", "passthrough", numeric_features),
-        ("cat", OneHotEncoder(handle_unknown="ignore"), categorical_features)
+        ("num", "passthrough", numeric_features),    #las variables numericas estan bien, que no las toque (passthrough)
+        ("cat", OneHotEncoder(handle_unknown="ignore"), categorical_features)   #convertimos texto en columnas numéricas (onehot)
     ]
 )
 
+
+#Ahora todo dataframe pasa por estas reglas
+
 #logistic regression, class_weight="balanced": corrige desbalance, max_iter=1000: asegura convergencia
+#funciona sin escalado porque no tenemos magnitudes extremas. Añadir StandarScaler
 
 model = Pipeline(steps=[
     ("preprocess", preprocessor),
@@ -105,14 +119,14 @@ model = Pipeline(steps=[
     ))
 ])
 
-#80% entrenamiento, 20% test manteniendo proporción retrasos.
+#80% entrenamiento, 20% test manteniendo proporción retrasos. #x son columnas preictibles y es la respuesta. Miramos x para preecir y
 
-X_train, X_test, y_train, y_test = train_test_split(
+X_train, X_test, y_train, y_test = train_test_split(     #rompemos en 2 el set
     X,
     y,
-    test_size=0.2,
+    test_size=0.2,     #20% e atos para examen
     random_state=42,
-    stratify=y
+    stratify=y           #nos aseguramos se mantenga la proporción sies y noes
 )
 
 #hacemos que aprenda patrones de delay
@@ -123,13 +137,13 @@ model.fit(X_train, y_train)
 
 from sklearn.metrics import classification_report, roc_auc_score
 
-y_pred = model.predict(X_test)
-y_proba = model.predict_proba(X_test)[:, 1]
+y_pred = model.predict(X_test)                   #el modelo responde con decisiones 1 retraso 0 no retraso
+y_proba = model.predict_proba(X_test)[:, 1]        #que tan probable es el retraso, me da solo la clase 1: retraso
 
 print("Classification Report:\n")
-print(classification_report(y_test, y_pred))
+print(classification_report(y_test, y_pred))         #informe clasificación que nos mide: cuantos vuelos se retrasaron realmente, el recall (cuantos etectamos ) y F1 (lo que  falla)
 
-print("ROC AUC:", roc_auc_score(y_test, y_proba))
+print("ROC AUC:", roc_auc_score(y_test, y_proba))      #ordenamos casos de mayor a menor riesgo. 1 es perfecto, 5 azar
 
 #guardamos modelo en pickle, listo para backend.
 
@@ -137,38 +151,39 @@ import joblib
 
 joblib.dump(model, "flight_delay_model.pkl")
 
-#hacemos random forest
+#hacemos random forest: conjunto de árboles que votan una decisión final.
 
 from sklearn.ensemble import RandomForestClassifier
 
 #random forest
 
 rf_model = Pipeline(steps=[
-    ("preprocess", preprocessor),
+    ("preprocess", preprocessor),                  #convertimos texto en numeros, ascalamos valores, rellenamos datos faltantes, ya que el modelo no entiende texto ni celdas vacías.
     ("classifier", RandomForestClassifier(
-        n_estimators=100,
-        max_depth=10,
-        random_state=42,
-        class_weight="balanced"
+        n_estimators=100,                           #numero de arboles en el bosque (100 es lo standar)
+        max_depth=10,                               #que tan alto crece cada arbol (muy alto se equivoca ya que memoriza, bajo generaliza mejor, 10 es lo standar)
+        random_state=42,                            #todos los arboles crecen igual
+        class_weight="balanced"                     #si hay pocos retrasos que no se ignoren porque hay muchos NO
     ))
 ])
 
-rf_model.fit(X_train, y_train)
+rf_model.fit(X_train, y_train)         #se limpian datos, se crean 100 arboles, cada arbol aprende una cosa distinta, el bosque entero aprende y emite su voto por cada arbol y gana la mayoría.
 
-y_pred_rf = rf_model.predict(X_test)
-y_proba_rf = rf_model.predict_proba(X_test)[:, 1]
+y_pred_rf = rf_model.predict(X_test)                   #mira cada vuelo y responbde 0 (no delay) o 1 (si delay)
+y_proba_rf = rf_model.predict_proba(X_test)[:, 1]       #qué probabilidad hay de retraso, dame solo 1 (probabilidad de delay)
 
-print("RANDOM FOREST - Classification Report:\n")
+print("RANDOM FOREST - Classification Report:\n")       #informe de clasificación: precision recall y f1
 print(classification_report(y_test, y_pred_rf))
 
-print("RANDOM FOREST - ROC AUC:", roc_auc_score(y_test, y_proba_rf))
+print("RANDOM FOREST - ROC AUC:", roc_auc_score(y_test, y_proba_rf))      #vemos que ordene bien
 
-#simulamos endpoint
+#simulamos endpoint como API
+#el modelo no recibe el JSON directamente, lo adaptamos como dataframe, que es lo que haría backend creo
 
 
 import pandas as pd
 
-def predict_flight_delay(input_json, model):
+def predict_flight_delay(input_json, model):    #creamos una función que predice si un vuelo se retrasa input_json simula el JSON. Mi función recibe un diccionario de python, no directamente el json
     """
     Simula el endpoint POST /predict
     """
@@ -201,7 +216,7 @@ def predict_flight_delay(input_json, model):
 
 #ejemplo de request
 
-input_example = {
+input_example = {                   #simula el json que llegaría desde una API. El back end transforma el json en python y llama a la funcion.
     "aerolinea": "AZ",
     "origen": "GIG",
     "destino": "GRU",
@@ -221,11 +236,16 @@ joblib.dump(model, "MVP_entrenamiento.pkl")
 
 import matplotlib.pyplot as plt
 
-df["delayed"].value_counts().plot(kind="bar")
+df["delayed"].value_counts().plot(kind="bar")   #contamos cuantos puntuales 0 o retrasados 1
 plt.title("Distribución de vuelos Puntuales vs Retrasados")
 plt.xlabel("Clase (0=Puntual, 1=Retrasado)")
 plt.ylabel("Número de vuelos")
 plt.show()
+
+# Este histograma muestra cómo se distribuyen las probabilidades
+# que el modelo asigna a los vuelos de test
+# Nos permite ver si el modelo separa bien casos de bajo y alto riesgo
+
 
 plt.hist(y_proba, bins=20)
 plt.title("Distribución de probabilidad de retraso")
@@ -233,19 +253,25 @@ plt.xlabel("Probabilidad de retraso")
 plt.ylabel("Número de vuelos")
 plt.show()
 
+# Importamos la función para calcular la curva ROC
+# La curva ROC evalúa la capacidad del modelo para
+# diferenciar entre vuelos puntuales y retrasados
+
 from sklearn.metrics import roc_curve
 
-fpr, tpr, _ = roc_curve(y_test, y_proba)
+fpr, tpr, _ = roc_curve(y_test, y_proba)     # Calculamos la tasa de falsos positivos (FPR) y la tasa de verdaderos positivos (TPR)
 
-plt.plot(fpr, tpr)
-plt.plot([0, 1], [0, 1], linestyle="--")
+plt.plot(fpr, tpr)                             # Dibujamos la curva ROC del modelo
+plt.plot([0, 1], [0, 1], linestyle="--")         # Línea diagonal = modelo aleatorio (sin capacidad predictiva)
 plt.xlabel("False Positive Rate")
 plt.ylabel("True Positive Rate")
 plt.title("Curva ROC - Logistic Regression")
 plt.show()
 
-# Obtener nombres reales de las features
+# Obtener nombres reales de las features. Numéricas se mantienen igual.
 numeric_names = numeric_features
+
+# Las categóricas se expanden en múltiples columnas por el One Hot Encoding
 
 categorical_names = (
     model.named_steps["preprocess"]
@@ -253,10 +279,14 @@ categorical_names = (
     .get_feature_names_out(categorical_features)
 )
 
+# Unimos todas las variables en una sola lista
+
 feature_names = list(numeric_names) + list(categorical_names)
 
-# Coeficientes del modelo
+# Coeficientes del modelo de regresión log.
 coefficients = model.named_steps["classifier"].coef_[0]    #Extrae el peso real de cada feature
+
+#Creamos dataframe para manejar mejor
 
 importance_df = pd.DataFrame({
     "feature": feature_names,
@@ -284,7 +314,7 @@ plt.show()
 def predict_flight_delay(input_json, model):
     fecha = pd.to_datetime(input_json["fecha_partida"])
 
-    df_input = pd.DataFrame([{
+    df_input = pd.DataFrame([{                                #aquí es donde convbertimos los datos en datos útiles segun JSON
         "hour": fecha.hour,
         "distance": input_json["distancia_km"],
         "marketing_airline_network": input_json["aerolinea"],
@@ -293,15 +323,15 @@ def predict_flight_delay(input_json, model):
         "wind_speed": 10.0
     }])
 
-    pred = model.predict(df_input)[0]
-    proba = model.predict_proba(df_input)[0, 1]
+    pred = model.predict(df_input)[0]                     #pred= decision final, si o no.
+    proba = model.predict_proba(df_input)[0, 1]           #proba= probabilidad de retraso
 
     return {
         "prevision": "Retrasado" if pred == 1 else "Puntual",
         "probabilidad": round(float(proba), 2)
     }
 
-#Llamamos al endpoint varias veces
+#Llamamos al endpoint varias veces. Usamos claves según JSON.
 
 inputs = [
     {
@@ -326,16 +356,20 @@ inputs = [
     }
 ]
 
-results = []
+results = []             #lista vacía donde guardamos resultados
+
+# Recorremos la lista de inputs simulando varias llamadas al endpoint. enumerate nos da un índice (i) y el contenido del input (inp)
 
 for i, inp in enumerate(inputs):
-    response = predict_flight_delay(inp, model)
-    results.append({
-        "vuelo": f"Vuelo {i+1}",
-        "aerolinea": inp["aerolinea"],
-        "probabilidad": response["probabilidad"],
-        "prevision": response["prevision"]
+    response = predict_flight_delay(inp, model)       # Llamamos a la función de predicción como si fuera una API
+    results.append({                                       # Guardamos el resultado en la lista y añadimos información útil para visualizarla luego en una tabla
+        "vuelo": f"Vuelo {i+1}",                           #identificador vuelo
+        "aerolinea": inp["aerolinea"],                    #aerolinea
+        "probabilidad": response["probabilidad"],            #probabilidad e retraso
+        "prevision": response["prevision"]                    #final: puntual o retrasado
     })
+
+# Convertimos la lista de resultados en un DataFrame y lo vemos
 
 df_results = pd.DataFrame(results)
 df_results
@@ -343,6 +377,10 @@ df_results
 import matplotlib.pyplot as plt
 
 plt.figure(figsize=(8, 5))
+
+# Creamos un gráfico de barras
+# Cada barra representa una llamada al endpoint (un vuelo)
+# La altura de la barra es la probabilidad de retraso
 
 plt.bar(
     df_results["vuelo"],
@@ -365,11 +403,22 @@ for i, row in df_results.iterrows():
 plt.ylim(0, 1)
 plt.show()
 
-#Matrices de confusión.
+# Matrices de confusión. Nos permite ver cómo acertamos o fallamos con el modelo.
+# confusion_matrix calcula la matriz
+# ConfusionMatrixDisplay la dibuja de forma visual
 
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
+# Calculamos la matriz de confusión comparando:
+# y_test -> valores reales
+# y_pred -> predicciones del modelo
+
 cm = confusion_matrix(y_test, y_pred)
+
+# Creamos el objeto de visualización
+# Las etiquetas indican:
+# Puntual = 0
+# Retrasado = 1
 
 disp = ConfusionMatrixDisplay(
     confusion_matrix=cm,
@@ -380,6 +429,9 @@ disp.plot(cmap="Blues")
 plt.title("Matriz de confusión - Logistic Regression")
 plt.show()
 
+# Repetimos el mismo análisis que antes
+# pero usando el modelo Random Forest
+
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 import matplotlib.pyplot as plt
 
@@ -388,6 +440,10 @@ y_pred_rf = rf_model.predict(X_test)
 
 # Matriz de confusión
 cm_rf = confusion_matrix(y_test, y_pred_rf)
+
+# Creamos el objeto de visualización
+# Puntual = 0
+# Retrasado = 1
 
 disp_rf = ConfusionMatrixDisplay(
     confusion_matrix=cm_rf,
@@ -398,7 +454,7 @@ disp_rf.plot(cmap="Greens")
 plt.title("Matriz de confusión - Random Forest")
 plt.show()
 
-# --- Ajuste de umbral para aumentar precision ---
+# Ajuste de umbral para aumentar precision
 
 from sklearn.metrics import classification_report, confusion_matrix, ConfusionMatrixDisplay
 import matplotlib.pyplot as plt
@@ -426,8 +482,15 @@ disp_thresh.plot(cmap="Purples")
 plt.title(f"Matriz de confusión (umbral = {threshold})")
 plt.show()
 
+# Creamos una versión mejorada del Random Forest
+# Ajustando algunos hiperparámetros para mejorar la generalización
+
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.pipeline import Pipeline
+
+# Definimos un nuevo pipeline
+# Usamos el mismo preprocesador para asegurar consistencia
+
 rf_model_tuned = Pipeline(steps=[
     ("preprocess", preprocessor),
     ("classifier", RandomForestClassifier(
@@ -439,21 +502,52 @@ rf_model_tuned = Pipeline(steps=[
     ))
 ])
 
+# Entrenamos el Random Forest ajustado
+# El pipeline aplica automáticamente el preprocesado
+# y luego entrena el modelo con los nuevos hiperparámetros
+
 rf_model_tuned.fit(X_train, y_train)
+
+# Calculamos las métricas del modelo una vez entrenado
+# Usamos el mismo conjunto de test para comparar con los modelos anteriores
 
 from sklearn.metrics import classification_report, roc_auc_score
 
+# Predicción final del modelo ajustado (0 = puntual, 1 = retrasado)
+
 y_pred_rf_tuned = rf_model_tuned.predict(X_test)
+
+# Probabilidad de retraso para cada vuelo
+# Nos quedamos solo con la clase 1 (retrasado)
+
 y_proba_rf_tuned = rf_model_tuned.predict_proba(X_test)[:, 1]
+
+# precision, recall, f1-score y soporte
 
 print("Random Forest ajustado")
 print(classification_report(y_test, y_pred_rf_tuned))
+
+# Calculamos el ROC AUC
+# Mide la capacidad del modelo para ordenar vuelos
+# según su probabilidad de retraso
+
 print("ROC AUC:", roc_auc_score(y_test, y_proba_rf_tuned))
+
+# Visualizamos los aciertos y errores del modelo final
+# para entender su comportamiento real en producción
 
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 import matplotlib.pyplot as plt
 
+# Calculamos la matriz de confusión usando:
+# y_test -> valores reales
+# y_pred_rf_tuned -> predicciones del modelo ajustado
+
 cm_rf_tuned = confusion_matrix(y_test, y_pred_rf_tuned)
+
+# Creamos el objeto de visualización
+# Puntual = 0
+# Retrasado = 1
 
 disp_rf_tuned = ConfusionMatrixDisplay(
     confusion_matrix=cm_rf_tuned,
@@ -463,3 +557,51 @@ disp_rf_tuned = ConfusionMatrixDisplay(
 disp_rf_tuned.plot(cmap="Oranges")
 plt.title("Matriz de confusión - Random Forest ajustado")
 plt.show()
+
+# CONCLUSIONES FINALES
+
+
+# 1. OBJETIVO DEL NOTEBOOK
+# Este notebook tiene como objetivo entrenar y evaluar modelos
+# que predicen si un vuelo llegará retrasado o no
+# usando información disponible antes del despegue.
+#
+# 2. MODELOS PROBADOS
+# - Regresión Logística: modelo base, simple e interpretable.
+# - Random Forest: modelo más complejo, capaz de capturar relaciones no lineales.
+# - Random Forest ajustado: versión mejorada con hiperparámetros afinados.
+#
+# 3. RESULTADOS
+# - La regresión logística funciona bien como baseline
+#   y es fácil de explicar.
+# - El Random Forest mejora la detección de retrasos,
+#   especialmente tras el ajuste de hiperparámetros.
+# - El modelo ajustado ofrece el mejor equilibrio
+#   entre recall, precision y estabilidad.
+#
+# 4. ELECCIÓN DEL MODELO
+# El Random Forest ajustado es el modelo recomendado
+# para usar en producción en este MVP,
+# ya que detecta mejor los vuelos con riesgo de retraso.
+#
+# 5. USO EN PRODUCCIÓN
+# - El modelo entrenado se guarda en un archivo .pkl.
+# - El backend solo debe cargar el modelo y llamar a la función de predicción.
+# - No se reentrena el modelo en producción.
+#
+# 6. LIMITACIONES
+# - Algunas variables (clima) se usan con valores por defecto (MVP).
+# - El modelo depende de la calidad del dataset histórico.
+# - No se ha optimizado el umbral según necesidades de negocio.
+#
+# 7. POSIBLES MEJORAS
+# - Añadir clima real por aeropuerto y fecha.
+# - Ajustar el umbral según coste de errores.
+# - Probar modelos adicionales o calibrar probabilidades.
+# - Automatizar reentrenamiento periódico.
+#
+# Este notebook sirve como base técnica clara y reproducible
+# para el MVP de predicción de retrasos.
+
+
+#A la espera de mejorar el modelo con una mejor API externa y aplicar algunas herramientas que mejoren el desempeño del modelo.
