@@ -153,4 +153,16 @@ Incluye:
 
 ## Equipo
 Proyecto desarrollado como parte de un **hackathon ONE** de Data Science y Back-End.
+👥 Equipo
+
+Ciencia de Datos
+* Ezequiel Samuel Prilusky
+* Javier Menéndez
+* Ganna Kharkovska
+* Rafael Osuna
+* Alexander Tovar Morcillo
+
+Colaboracion del equipo de Back-End
+
+Como MVP para hackathon académico.
 
