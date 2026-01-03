@@ -1,41 +1,99 @@
 # FlightOnTime – MVP Predicción de Retrasos de Vuelos
 
 # Descripción del proyecto
-FlightOnTime es un **MVP de Machine Learning** que predice si un vuelo será **Puntual** o **Retrasado**, utilizando información del vuelo y variables meteorológicas.
+FlightOnTime es un producto mínimo viable (MVP) que utiliza Ciencia de Datos y Machine Learning para predecir si un vuelo será Puntual o Retrasado, antes de su despegue.
 
-El objetivo es demostrar un flujo completo de **Data Science aplicado**, desde datos históricos hasta un modelo listo para ser integrado en una API.
-
----
-
-## Problema de negocio
-Los retrasos en vuelos generan:
-- insatisfacción en pasajeros
-- costos operativos para aerolíneas
-- problemas de planificación en aeropuertos
-
-Este proyecto busca **anticipar retrasos** para permitir una mejor toma de decisiones.
+La solución está orientada al sector de Aviación Civil, Logística y Transporte Aéreo, y expone un servicio de predicción en tiempo real mediante una API REST, permitiendo a aerolíneas, aeropuertos y sistemas externos anticiparse a retrasos operativos., desde datos históricos hasta un modelo listo para ser integrado en una API.
 
 ---
 
-## Dataset
-El dataset utilizado contiene información histórica de vuelos, incluyendo:
+## 🎯 Problema de negocio (no técnico)
 
-### Variables principales
-- **hour**: hora de salida del vuelo
-- **distance**: distancia del vuelo (km)
-- **marketing_airline_network**: aerolínea
-- **temp_mean**: temperatura media
-- **precipitation**: precipitación
-- **wind_speed**: velocidad del viento
+Los retrasos en vuelos generan impactos significativos:
 
-### Variable objetivo
-- **target**
-  - `0` → Puntual  
-  - `1` → Retrasado  
+❌ Insatisfacción de los pasajeros
 
-El dataset se encuentra en:
+💰 Incremento de costos operativos
+
+🔁 Pérdida de conexiones y reprogramaciones
+
+🏗️ Uso ineficiente de la infraestructura aeroportuaria
+
+Actualmente, muchas decisiones se toman de forma reactiva, cuando el retraso ya ocurrió.
+
+---
+
+## 🧠 Solución propuesta
+
+FlightOnTime permite anticipar el riesgo de retraso utilizando información disponible antes del vuelo, como:
+
+Aerolínea
+
+Ciudad de origen
+
+Hora del vuelo
+
+Distancia
+
+Condiciones climáticas
+
+Beneficios clave:
+
+📲 Pasajeros informados con antelación
+
+✈️ Aerolíneas con mejor planificación operativa
+
+🏢 Aeropuertos con uso más eficiente de recursos
+
+Incluso un modelo simple genera valor inmediato, al identificar vuelos con mayor probabilidad de retraso.
+
+---
+
+## Alcance del MVP
+
+Tipo de problema: Clasificación binaria
+
+Salida del modelo:
+
+Puntual
+
+Retrasado
+
+Enfoque: Modelo ligero, explicable y reproducible
+
+Orientado a: Hackathon / Always Free / Entorno académico
+
+---
+
+## Dataset Utilizado
+
 ```
-data/dataset_vuelos_clima_final.csv
+dataset_vuelos_clima_final.csv
+
+Variables utilizadas (nombres originales, sin modificaciones):
+
+marketing_airline_network
+
+origincityname
+
+hour
+
+distance
+
+temp_mean
+
+precipitation
+
+wind_speed
+
+Variable objetivo:
+
+delayed = 0 → Vuelo puntual
+
+delayed = 1 → Vuelo retrasado
+
+El dataset combina información operacional de vuelos con condiciones climáticas, permitiendo capturar patrones relevantes de retraso.
+
 ```
 
 Incluye **features meteorológicas** integradas desde una API externa de clima.
@@ -133,6 +191,7 @@ Incluye:
 - scikit-learn
 - Jupyter Notebook
 - joblib
+- FastAPI
 
 ---
 
@@ -153,9 +212,9 @@ Incluye:
 
 ## Equipo
 Proyecto desarrollado como parte de un **hackathon ONE** de Data Science y Back-End.
-👥 Equipo
 
-Ciencia de Datos
+👥 Equipo Ciencia de Datos
+
 * Ezequiel Samuel Prilusky
 * Javier Menéndez
 * Ganna Kharkovska
@@ -166,3 +225,6 @@ Colaboracion del equipo de Back-End
 
 Como MVP para hackathon académico.
 
+🏁 Conclusión
+
+FlightOnTime demuestra cómo una solución de Ciencia de Datos bien integrada puede generar valor inmediato, incluso con un modelo simple, cuando está alineada a un problema real de negocio y expuesta mediante una arquitectura clara y escalable.
