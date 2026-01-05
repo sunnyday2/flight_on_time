@@ -1,6 +1,7 @@
 # ✈️ FlightOnTime – MVP Predicción de Retrasos de Vuelos
 
 # Descripción del proyecto
+
 FlightOnTime es un producto mínimo viable (MVP) que utiliza Ciencia de Datos y Machine Learning para predecir si un vuelo será Puntual o Retrasado, antes de su despegue.
 
 La solución está orientada al sector de Aviación Civil, Logística y Transporte Aéreo, y expone un servicio de predicción en tiempo real mediante una API REST, permitiendo a aerolíneas, aeropuertos y sistemas externos anticiparse a retrasos operativos., desde datos históricos hasta un modelo listo para ser integrado en una API.
@@ -12,11 +13,8 @@ La solución está orientada al sector de Aviación Civil, Logística y Transpor
 Los retrasos en vuelos generan impactos significativos:
 
 ❌ Insatisfacción de los pasajeros
-
 💰 Incremento de costos operativos
-
 🔁 Pérdida de conexiones y reprogramaciones
-
 🏗️ Uso ineficiente de la infraestructura aeroportuaria
 
 Actualmente, muchas decisiones se toman de forma reactiva, cuando el retraso ya ocurrió.
@@ -27,22 +25,16 @@ Actualmente, muchas decisiones se toman de forma reactiva, cuando el retraso ya 
 
 FlightOnTime permite anticipar el riesgo de retraso utilizando información disponible antes del vuelo, como:
 
-Aerolínea
-
-Ciudad de origen
-
-Hora del vuelo
-
-Distancia
-
-Condiciones climáticas
+- Aerolínea
+- Ciudad de origen
+- Hora del vuelo
+- Distancia
+- Condiciones climáticas
 
 Beneficios clave:
 
 📲 Pasajeros informados con antelación
-
 ✈️ Aerolíneas con mejor planificación operativa
-
 🏢 Aeropuertos con uso más eficiente de recursos
 
 Incluso un modelo simple genera valor inmediato, al identificar vuelos con mayor probabilidad de retraso.
@@ -54,10 +46,8 @@ Incluso un modelo simple genera valor inmediato, al identificar vuelos con mayor
 Tipo de problema: Clasificación binaria
 
 Salida del modelo:
-
-Puntual
-
-Retrasado
+- Puntual o Retrasado
+- Probabilidad
 
 Enfoque: Modelo ligero, explicable y reproducible
 
@@ -72,25 +62,18 @@ dataset_vuelos_clima_final.csv
 ```
 Variables utilizadas (nombres originales, sin modificaciones):
 
-marketing_airline_network
-
-origincityname
-
-hour
-
-distance
-
-temp_mean
-
-precipitation
-
-wind_speed
+- marketing_airline_network
+- origincityname
+- hour
+- distance
+- temp_mean
+- precipitation
+- wind_speed
 
 Variable objetivo:
 
-delayed = 0 → Vuelo puntual
-
-delayed = 1 → Vuelo retrasado
+- delayed = 0 → Vuelo puntual
+- delayed = 1 → Vuelo retrasado
 
 El dataset combina información operacional de vuelos con condiciones climáticas, permitiendo capturar patrones relevantes de retraso.
 Incluye **features meteorológicas** integradas desde una API externa de clima.
@@ -126,11 +109,13 @@ Se entrenaron y compararon dos modelos:
 ## Resultados principales
 
 ### Logistic Regression
+
 - Accuracy ≈ **0.68 – 0.81** (según umbral)
 - Buen control del trade-off entre precision y recall
 - Modelo elegido para el MVP
 
 ### Random Forest
+
 - Accuracy ≈ **0.81**
 - Mejor ROC AUC
 - Menor interpretabilidad
@@ -140,6 +125,7 @@ Se entrenaron y compararon dos modelos:
 ---
 
 ## Ajustes realizados
+
 - Se analizó el impacto de **modificar el umbral de decisión** para aumentar la precision
 - Se ajustaron hiperparámetros del Random Forest para análisis
 - **Solo el modelo base se exporta**, los ajustes quedan como análisis
@@ -147,6 +133,7 @@ Se entrenaron y compararon dos modelos:
 ---
 
 ## Modelo exportado
+
 El modelo final entrenado se guarda como:
 
 ```
@@ -154,6 +141,7 @@ model/MVP_entrenamiento.pkl
 ```
 
 Incluye:
+
 - preprocesamiento
 - modelo entrenado
 - listo para ser cargado por un backend
@@ -173,6 +161,7 @@ Incluye:
 ```
 
 ### Ejemplo de salida esperada
+
 ```json
 {
   "prevision": "Puntual",
@@ -183,6 +172,7 @@ Incluye:
 ---
 
 ## Tecnologías utilizadas
+
 - Python
 - Pandas
 - scikit-learn
@@ -193,6 +183,7 @@ Incluye:
 ---
 
 ## Estado del proyecto
+
 ✔ MVP funcional  
 ✔ Modelo entrenado y evaluado  
 ✔ Listo para integración vía API REST  
@@ -200,6 +191,7 @@ Incluye:
 ---
 
 ## Trabajo futuro
+
 - Integración completa con API REST (Spring Boot)
 - Ajuste dinámico del umbral según negocio
 - Dashboard visual de predicciones
@@ -208,6 +200,7 @@ Incluye:
 ---
 
 ## Equipo
+
 Proyecto desarrollado como parte de un **hackathon ONE** de Data Science y Back-End.
 
 👥 Equipo Ciencia de Datos
