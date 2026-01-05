@@ -13,8 +13,11 @@ La solución está orientada al sector de Aviación Civil, Logística y Transpor
 Los retrasos en vuelos generan impactos significativos:
 
 ❌ Insatisfacción de los pasajeros
+
 💰 Incremento de costos operativos
+
 🔁 Pérdida de conexiones y reprogramaciones
+
 🏗️ Uso ineficiente de la infraestructura aeroportuaria
 
 Actualmente, muchas decisiones se toman de forma reactiva, cuando el retraso ya ocurrió.
@@ -34,7 +37,9 @@ FlightOnTime permite anticipar el riesgo de retraso utilizando información disp
 Beneficios clave:
 
 📲 Pasajeros informados con antelación
+
 ✈️ Aerolíneas con mejor planificación operativa
+
 🏢 Aeropuertos con uso más eficiente de recursos
 
 Incluso un modelo simple genera valor inmediato, al identificar vuelos con mayor probabilidad de retraso.
@@ -46,6 +51,7 @@ Incluso un modelo simple genera valor inmediato, al identificar vuelos con mayor
 Tipo de problema: Clasificación binaria
 
 Salida del modelo:
+
 - Puntual o Retrasado
 - Probabilidad
 
