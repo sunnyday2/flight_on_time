@@ -203,11 +203,15 @@ print("seaborn:", sns.__version__)
 print("plotly:", plotly.__version__)
 ```
   
-## ¿Como puedes ejecutar un notebook?
+## ¿Cómo puedes ejecutar un notebook?
 
-- Ejecutarlo localmente en Visual Studio Code
-- Cargar el archivo .ipynb a tu Google Disk y ejecutar el notebook en [Google Colab](https://colab.research.google.com)
-- Ejecutar en el entorno virtual de GitHub. En tu repositorio, haz clic en el botón verde Code → pestaña Codespaces → selecciona Create codespace on main (o la rama que quieras). ![Code space](./img/codespace.png)
+- Ejecutarlo localmente en Visual Studio Code.
+- Cargar el archivo `.ipynb` a tu Google Drive y ejecutarlo en [Google Colab](https://colab.research.google.com).
+- Abrir el enlace a Google Colab:  
+  ![Google Colab](./img/colab.png)
+- Ejecutarlo en GitHub Codespaces. En tu repositorio, haz clic en el botón verde **Code** → pestaña **Codespaces** → selecciona **Create codespace on main** (o en la rama que quieras).  
+  ![Codespace](./img/codespace.png)
+
   
 ## ⚙️ Instalación y dependencias en el entorno virtual
 
