@@ -25,7 +25,7 @@ import joblib
 
 # Dataset generado en la fase anterior (vuelos + clima)
 
-df = pd.read_csv("dataset_vuelos_clima_final (2).csv")
+df = pd.read_csv("dataset_vuelos_clima_final.csv")
 
 print(df.shape)
 df.head()
