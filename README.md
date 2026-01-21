@@ -4,6 +4,10 @@
 
 FlightOnTime es un producto mínimo viable (MVP) que utiliza Ciencia de Datos y Machine Learning para predecir si un vuelo será Puntual o Retrasado, antes de su despegue.
 
+Tenemos dos notebook:
+1. Utilizado para crear el dataset con clima y ubicación de aeropuertos [kaggle_notebook_clima.ipynb](https://github.com/sunnyday2/flight_on_time/blob/main/kaggle_notebook_clima.ipynb).
+2. Utilizado para exploración de dataset y entrenamiento de modelo [flightontime_hackaton_e32_alura_latam.ipynbm](https://github.com/sunnyday2/flight_on_time/blob/main/flightontime_hackaton_e32_alura_latam.ipynb).
+
 La solución está orientada al sector de Aviación Civil, Logística y Transporte Aéreo, y expone un servicio de predicción en tiempo real mediante una API REST, permitiendo a aerolíneas, aeropuertos y sistemas externos anticiparse a retrasos operativos., desde datos históricos hasta un modelo listo para ser integrado en una API.
 
 ---
@@ -248,6 +252,14 @@ jupyter notebook
 ✔ Modelo entrenado y evaluado  
 ✔ Listo para integración vía API REST  
 
+El modelo esta integrado con una aplicación y los respositorios de estos se pueden ver en:
+
+  [FastApi](https://github.com/GP-Core/microServicioML)
+
+  [FrontEnd](https://github.com/JaimeValleZ/FlightOnTime-FrontEnd)
+
+  [Backend](https://github.com/JaimeValleZ/FlightOnTime)
+  
 ---
 
 ## Trabajo futuro
